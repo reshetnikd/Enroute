@@ -27,20 +27,44 @@ struct FilterFlights: View {
         NavigationView {
             Form {
                 Picker("Destination", selection: $draft.destination) {
-                    ForEach(allAirports.codes, id: \.self) { airport in
-                        Text("\(self.allAirports[airport]?.friendlyName ?? airport)").tag(airport)
+                    if #available(iOS 14.0, *) {
+                        ForEach(allAirports.codes, id: \.self) { airport in
+                            Text("\(self.allAirports[airport]?.friendlyName ?? airport)").tag(airport)
+                        }
+                        .navigationTitle("Destination")
+                    } else {
+                        // Fallback on earlier versions
+                        ForEach(allAirports.codes, id: \.self) { airport in
+                            Text("\(self.allAirports[airport]?.friendlyName ?? airport)").tag(airport)
+                        }
                     }
                 }
                 Picker("Origin", selection: $draft.origin) {
                     Text("Any").tag(String?.none)
-                    ForEach(allAirports.codes, id: \.self) { (airport: String?) in
-                        Text("\(self.allAirports[airport]?.friendlyName ?? airport ?? "Any")").tag(airport)
+                    if #available(iOS 14.0, *) {
+                        ForEach(allAirports.codes, id: \.self) { (airport: String?) in
+                            Text("\(self.allAirports[airport]?.friendlyName ?? airport ?? "Any")").tag(airport)
+                        }
+                        .navigationTitle("Origin")
+                    } else {
+                        // Fallback on earlier versions
+                        ForEach(allAirports.codes, id: \.self) { (airport: String?) in
+                            Text("\(self.allAirports[airport]?.friendlyName ?? airport ?? "Any")").tag(airport)
+                        }
                     }
                 }
                 Picker("Airline", selection: $draft.airline) {
                     Text("Any").tag(String?.none)
-                    ForEach(allAirlines.codes, id: \.self) { (airline: String?) in
-                        Text("\(self.allAirlines[airline]?.friendlyName ?? airline ?? "Any")").tag(airline)
+                    if #available(iOS 14.0, *) {
+                        ForEach(allAirlines.codes, id: \.self) { (airline: String?) in
+                            Text("\(self.allAirlines[airline]?.friendlyName ?? airline ?? "Any")").tag(airline)
+                        }
+                        .navigationTitle("Airline")
+                    } else {
+                        // Fallback on earlier versions
+                        ForEach(allAirlines.codes, id: \.self) { (airline: String?) in
+                            Text("\(self.allAirlines[airline]?.friendlyName ?? airline ?? "Any")").tag(airline)
+                        }
                     }
                 }
                 Toggle(isOn: $draft.inTheAir) { Text("Enroute Only") }
