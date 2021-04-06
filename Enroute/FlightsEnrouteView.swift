@@ -76,12 +76,23 @@ struct FlightList: View {
     }
 
     var body: some View {
-        List {
-            ForEach(flights, id: \.ident) { flight in
-                FlightListEntry(flight: flight)
+        if #available(iOS 14.0, *) {
+            List {
+                ForEach(flights, id: \.ident) { flight in
+                    FlightListEntry(flight: flight)
+                }
             }
+            .listStyle(InsetListStyle())
+            .navigationBarTitle(title)
+        } else {
+            // Fallback on earlier versions
+            List {
+                ForEach(flights, id: \.ident) { flight in
+                    FlightListEntry(flight: flight)
+                }
+            }
+            .navigationBarTitle(title)
         }
-        .navigationBarTitle(title)
     }
     
     private var title: String {
