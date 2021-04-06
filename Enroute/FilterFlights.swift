@@ -2,15 +2,15 @@
 //  FilterFlights.swift
 //  Enroute
 //
-//  Created by CS193p Instructor on 5/12/20.
+//  Created by CS193p Instructor.
 //  Copyright © 2020 Stanford University. All rights reserved.
 //
 
 import SwiftUI
 
 struct FilterFlights: View {
-    @ObservedObject var allAirports = Airports.all
-    @ObservedObject var allAirlines = Airlines.all
+    @FetchRequest(fetchRequest: Airport.fetchRequest(.all)) var airports: FetchedResults<Airport>
+    @FetchRequest(fetchRequest: Airline.fetchRequest(.all)) var airlines: FetchedResults<Airline>
 
     @Binding var flightSearch: FlightSearch
     @Binding var isPresented: Bool
@@ -28,49 +28,49 @@ struct FilterFlights: View {
             Form {
                 Picker("Destination", selection: $draft.destination) {
                     if #available(iOS 14.0, *) {
-                        ForEach(allAirports.codes, id: \.self) { airport in
-                            Text("\(self.allAirports[airport]?.friendlyName ?? airport)").tag(airport)
+                        ForEach(airports.sorted(), id: \.self) { airport in
+                            Text("\(airport.friendlyName)").tag(airport)
                         }
                         .navigationTitle("Destination")
                     } else {
                         // Fallback on earlier versions
-                        ForEach(allAirports.codes, id: \.self) { airport in
-                            Text("\(self.allAirports[airport]?.friendlyName ?? airport)").tag(airport)
+                        ForEach(airports.sorted(), id: \.self) { airport in
+                            Text("\(airport.friendlyName)").tag(airport)
                         }
                     }
                 }
                 Picker("Origin", selection: $draft.origin) {
-                    Text("Any").tag(String?.none)
+                    Text("Any").tag(Airport?.none)
                     if #available(iOS 14.0, *) {
-                        ForEach(allAirports.codes, id: \.self) { (airport: String?) in
-                            Text("\(self.allAirports[airport]?.friendlyName ?? airport ?? "Any")").tag(airport)
+                        ForEach(airports.sorted(), id: \.self) { (airport: Airport?) in
+                            Text("\(airport?.friendlyName ?? "Any")").tag(airport)
                         }
                         .navigationTitle("Origin")
                     } else {
                         // Fallback on earlier versions
-                        ForEach(allAirports.codes, id: \.self) { (airport: String?) in
-                            Text("\(self.allAirports[airport]?.friendlyName ?? airport ?? "Any")").tag(airport)
+                        ForEach(airports.sorted(), id: \.self) { (airport: Airport?) in
+                            Text("\(airport?.friendlyName ?? "Any")").tag(airport)
                         }
                     }
                 }
                 Picker("Airline", selection: $draft.airline) {
-                    Text("Any").tag(String?.none)
+                    Text("Any").tag(Airline?.none)
                     if #available(iOS 14.0, *) {
-                        ForEach(allAirlines.codes, id: \.self) { (airline: String?) in
-                            Text("\(self.allAirlines[airline]?.friendlyName ?? airline ?? "Any")").tag(airline)
+                        ForEach(airlines.sorted(), id: \.self) { (airline: Airline?) in
+                            Text("\(airline?.friendlyName ?? "Any")").tag(airline)
                         }
                         .navigationTitle("Airline")
                     } else {
                         // Fallback on earlier versions
-                        ForEach(allAirlines.codes, id: \.self) { (airline: String?) in
-                            Text("\(self.allAirlines[airline]?.friendlyName ?? airline ?? "Any")").tag(airline)
+                        ForEach(airlines.sorted(), id: \.self) { (airline: Airline?) in
+                            Text("\(airline?.friendlyName ?? "Any")").tag(airline)
                         }
                     }
                 }
                 Toggle(isOn: $draft.inTheAir) { Text("Enroute Only") }
             }
             .navigationBarTitle("Filter Flights")
-                .navigationBarItems(leading: cancel, trailing: done)
+            .navigationBarItems(leading: cancel, trailing: done)
         }
     }
     
@@ -79,8 +79,12 @@ struct FilterFlights: View {
             self.isPresented = false
         }
     }
+    
     var done: some View {
         Button("Done") {
+            if self.draft.destination != self.flightSearch.destination {
+                self.draft.destination.fetchIncomingFlights()
+            }
             self.flightSearch = self.draft
             self.isPresented = false
         }
