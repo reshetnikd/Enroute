@@ -8,6 +8,7 @@
 
 import CoreData
 import Combine
+import MapKit
 
 extension Airport: Comparable {
     static func withICAO(_ icao: String, context: NSManagedObjectContext) -> Airport {
@@ -94,5 +95,19 @@ extension Airport: Comparable {
 
     public static func < (lhs: Airport, rhs: Airport) -> Bool {
         lhs.location ?? lhs.friendlyName < rhs.location ?? rhs.friendlyName
+    }
+}
+
+extension Airport: MKAnnotation {
+    public var coordinate: CLLocationCoordinate2D {
+        return CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+    }
+    
+    public var title: String? {
+        return name ?? icao
+    }
+    
+    public var subtitle: String? {
+        return location
     }
 }
